@@ -1,0 +1,1 @@
+pyinstaller --onefile --windowed --icon=emil.ico N_A_editor.py
