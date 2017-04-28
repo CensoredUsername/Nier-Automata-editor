@@ -165,7 +165,7 @@ Level - Minimum size (diamond mark):
 **Weapon Attack Up +5** 05 00 00 00 BE 0B 00 00 01 00 00 00
 **Weapon Attack Up +6** 06 00 00 00 BF 0B 00 00 01 00 00 00
 **Weapon Attack Up +7** 07 00 00 00 C0 0B 00 00 01 00 00 00
-**Weapon Attack Up +2** 08 00 00 00 C1 0B 00 00 01 00 00 00
+**Weapon Attack Up +8** 08 00 00 00 C1 0B 00 00 01 00 00 00
 **Down-Attack Up** 09 00 00 00 C2 0B 00 00 02 00 00 00
 **Down-Attack Up +1** 0A 00 00 00 C3 0B 00 00 02 00 00 00
 **Down-Attack Up +2** 0B 00 00 00 C4 0B 00 00 02 00 00 00
@@ -211,7 +211,7 @@ Level - Minimum size (diamond mark):
 **Melee Defence Up +6** 4F 00 00 00 EC 0B 00 00 06 00 00 00
 **Melee Defence Up +7** 50 00 00 00 ED 0B 00 00 06 00 00 00
 **Melee Defence Up +8** 51 00 00 00 EE 0B 00 00 06 00 00 00
-**Ranged Defence Up** 52 00 00 00 EF 0B 00 00 07 00 00 00 00
+**Ranged Defence Up** 52 00 00 00 EF 0B 00 00 07 00 00 00
 **Ranged Defence Up +1** 53 00 00 00 F0 0B 00 00 07 00 00 00
 **Ranged Defence Up +2** 54 00 00 00 F1 0B 00 00 07 00 00 00
 **Ranged Defence Up +3** 55 00 00 00 F2 0B 00 00 07 00 00 00
@@ -274,7 +274,7 @@ Level - Minimum size (diamond mark):
 **Evade Range Up +6** B2 00 00 00 2B 0C 00 00 0D 00 00 00
 **Evade Range Up +7** B3 00 00 00 2C 0C 00 00 0D 00 00 00
 **Evade Range Up +8** B4 00 00 00 2D 0C 00 00 0D 00 00 00
-**Moving Speed Up** B5 00 00 00 2E 0C 00 00 0E 00 00 00 00
+**Moving Speed Up** B5 00 00 00 2E 0C 00 00 0E 00 00 00
 **Moving Speed Up +1** B6 00 00 00 2F 0C 00 00 0E 00 00 00
 **Moving Speed Up +2** B7 00 00 00 30 0C 00 00 0E 00 00 00
 **Moving Speed Up +3** B8 00 00 00 31 0C 00 00 0E 00 00 00
@@ -355,7 +355,7 @@ Level - Minimum size (diamond mark):
 **Overclock +6** DF 00 00 00 7C 0C 00 00 16 00 00 00
 **Overclock +7** E0 00 00 00 7D 0C 00 00 16 00 00 00
 **Overclock +8** E1 00 00 00 7E 0C 00 00 16 00 00 00
-**Resilience ** 64 00 00 00 7F 0C 00 00 17 00 00 00
+**Resilience** 64 00 00 00 7F 0C 00 00 17 00 00 00
 **Resilience +1** 65 00 00 00 80 0C 00 00 17 00 00 00
 **Resilience +2** 66 00 00 00 81 0C 00 00 17 00 00 00
 **Resilience +3** 67 00 00 00 82 0C 00 00 17 00 00 00
