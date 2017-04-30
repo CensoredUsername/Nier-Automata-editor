@@ -3,3 +3,5 @@ dist/
 *.spec
 *.pyc
 __pycache__
+
+.vscode/

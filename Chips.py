@@ -132,15 +132,29 @@ class ChipsRecord(object):
     @staticmethod
     def unpack(bs):
         """Convert from bytes"""
-        if len(bs) == 48:
-            record = struct.unpack("<5I7i")
-            return ChipsRecord(*record)
-        elif len(bs) == 12:
-            record = struct.unpack("<3I")
-            return ChipsRecord("", record[0], record[1], record[2], 0, 4)
+        name = ChipsRecord.CHIPS_MAP[bs]
+        record = struct.unpack("<5I7i", bs)
+        return ChipsRecord(name, *record[:-4])
 
     @classmethod
     def from_name(cls, name):
         bs = cls.CHIPS_MAP[name]
-        record = struct.unpack("<5I")
+        record = struct.unpack("<5I", bs)
         return cls(name, *record)
+
+
+
+class ChipsRecordManager(object):
+
+    SAVE_DATA_CHIPS_OFFSET = 0x324BC
+    SAVE_DATA_CHIPS_OFFSET_END = 0x35CFB
+    SAVE_DATA_CHIPS_SIZE = SAVE_DATA_CHIPS_OFFSET - SAVE_DATA_CHIPS_OFFSET_END + 1
+
+    def __init__(self, bs=None, offset=0):
+        
+        if bs is not None:
+            self.blocks = bytearray(bs[offset:ChipsRecordManager.SAVE_DATA_CHIPS_SIZE])
+        else:
+            self.blocks = bytearray(ChipsRecordManager.SAVE_DATA_CHIPS_SIZE)
+            self.blocks[0:48] = b"\x22\x01\x00\x00\x0A\x0D\x00\x00\x2A\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    
