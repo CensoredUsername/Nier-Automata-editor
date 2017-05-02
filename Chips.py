@@ -1,5 +1,6 @@
 
 import struct
+from io import BytesIO
 
 COMMON_CHIPS = {
     "Weapon Attack Up": b"\x00\x00\x00\x00\xB9\x0B\x00\x00\x01\x00\x00\x00",
@@ -102,9 +103,9 @@ class ChipsMap(object):
 
     def __getitem__(self, key):
         if isinstance(key, bytes) or isinstance(key, bytearray):
-            return self.bytes_to_name_map[bytes(key)[:12]]
+            return self.bytes_to_name_map.get(bytes(key)[:12], "Invalid Chip")
         elif isinstance(key, str):
-            return self.name_to_bytes_map[key]
+            return self.name_to_bytes_map.get(key, b"\xFF"*44+b"\x00"*4)
 
 
 
@@ -131,7 +132,7 @@ class ChipsRecord(object):
 
     @staticmethod
     def unpack(bs):
-        """Convert from bytes"""
+        """ Convert from bytes """
         name = ChipsRecord.CHIPS_MAP[bs]
         record = struct.unpack("<5I7i", bs)
         return ChipsRecord(name, *record[:-4])
@@ -149,12 +150,34 @@ class ChipsRecordManager(object):
     SAVE_DATA_CHIPS_OFFSET = 0x324BC
     SAVE_DATA_CHIPS_OFFSET_END = 0x35CFB
     SAVE_DATA_CHIPS_SIZE = SAVE_DATA_CHIPS_OFFSET - SAVE_DATA_CHIPS_OFFSET_END + 1
+    SAVE_DATA_CHIPS_COUNT = SAVE_DATA_CHIPS_SIZE // 48
 
-    def __init__(self, bs=None, offset=0):
-        
-        if bs is not None:
-            self.blocks = bytearray(bs[offset:ChipsRecordManager.SAVE_DATA_CHIPS_SIZE])
+    def __init__(self, buf=None, offset=0):
+        if buf is not None:
+            self.blocks = bytearray(buf[offset:ChipsRecordManager.SAVE_DATA_CHIPS_SIZE])
         else:
             self.blocks = bytearray(ChipsRecordManager.SAVE_DATA_CHIPS_SIZE)
             self.blocks[0:48] = b"\x22\x01\x00\x00\x0A\x0D\x00\x00\x2A\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-    
+
+    def export(self):
+        return bytes(self.blocks)
+
+    def get_all_chips(self):
+        for i in range(self.SAVE_DATA_CHIPS_COUNT):
+            yield ChipsRecord.unpack(self.blocks[i*48: (i+1)*48])
+
+    def get_chip_at(self, index):
+        if not 0 <= index < ChipsRecordManager.SAVE_DATA_CHIPS_COUNT:
+            raise IndexError
+        return ChipsRecord.unpack(self.blocks[index*48: (index+1)*48])
+
+    def set_chip_at(self, index, record):
+        if not 0 <= index < ChipsRecordManager.SAVE_DATA_CHIPS_COUNT:
+            raise IndexError
+        self.blocks[index*48: (index+1)*48] = record.pack()
+
+    def __getitem__(self, index):
+        return self.get_chip_at(index)
+
+    def __setitem__(self, index, item):
+        self.set_chip_at(index, item)
