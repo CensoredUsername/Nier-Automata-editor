@@ -112,6 +112,7 @@ class ChipsMap(object):
 class ChipsRecord(object):
     """Represent a chip record"""
     CHIPS_MAP = ChipsMap()
+    AVAILABLE_CHIPS = tuple(CHIPS_MAP.name_to_bytes_map.keys())
 
     def __init__(self, name, chip_id_1, chip_id_2, type_id, level, size, offset_A=-1, offset_B=-1, offset_C=-1):
         self.name = name
@@ -142,6 +143,9 @@ class ChipsRecord(object):
         bs = cls.CHIPS_MAP[name]
         record = struct.unpack("<5I", bs)
         return cls(name, *record)
+
+    
+
 
 
 
