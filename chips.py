@@ -82,21 +82,21 @@ class ChipsMap(object):
     def __init__(self):
         self.name_to_bytes_map = dict()
         for k, v in COMMON_CHIPS.items():
-            self.name_to_bytes_map[k] = v + struct.pack("<2I", 0, 4)
-            r = struct.unpack("<3I", v)
+            self.name_to_bytes_map[k] = v + struct.pack("<2i", 0, 4)
+            r = struct.unpack("<3i", v)
             for i in range(1, 9):
-                nv = struct.pack("<3I", r[0]+i, r[1]+i, r[2])
+                nv = struct.pack("<3i", r[0]+i, r[1]+i, r[2])
                 self.name_to_bytes_map[k + " +" +
-                                       str(i)] = nv + struct.pack("<2I", i, LEVEL_MINIMUMSIZE[i])
+                                       str(i)] = nv + struct.pack("<2i", i, LEVEL_MINIMUMSIZE[i])
         for k, v in UNIQUE_CHIPS.items():
             self.name_to_bytes_map[k] = v
 
         self.bytes_to_name_map = dict()
         for k, v in COMMON_CHIPS.items():
             self.bytes_to_name_map[v] = k
-            r = struct.unpack("<3I", v)
+            r = struct.unpack("<3i", v)
             for i in range(1, 9):
-                nv = struct.pack("<3I", r[0]+i, r[1]+i, r[2])
+                nv = struct.pack("<3i", r[0]+i, r[1]+i, r[2])
                 self.bytes_to_name_map[nv] = k + " +" + str(i)
         for k, v in UNIQUE_CHIPS.items():
             self.bytes_to_name_map[v[:12]] = k
@@ -113,6 +113,7 @@ class ChipsRecord(object):
     """Represent a chip record"""
     CHIPS_MAP = ChipsMap()
     AVAILABLE_CHIPS = tuple(CHIPS_MAP.name_to_bytes_map.keys())
+    INVALID_CHIP = -1
 
     def __init__(self, name, chip_id_1, chip_id_2, type_id, level, size, offset_A=-1, offset_B=-1, offset_C=-1):
         self.name = name
@@ -127,7 +128,7 @@ class ChipsRecord(object):
 
     def pack(self):
         """Convert to bytes"""
-        return struct.pack("<5I7i", self.chip_id_1, self.chip_id_2,
+        return struct.pack("<12i", self.chip_id_1, self.chip_id_2,
                            self.type_id, self.level, self.size, self.offset_a, self.offset_b,
                            self.offset_c, -1, -1, -1, 0)
 
@@ -135,13 +136,15 @@ class ChipsRecord(object):
     def unpack(bs):
         """ Convert from bytes """
         name = ChipsRecord.CHIPS_MAP[bs]
-        record = struct.unpack("<5I7i", bs)
+        record = struct.unpack("<12i", bs)
+        if record[0] == record[1] == record[2] == -1:
+            return ChipsRecord.INVALID_CHIP
         return ChipsRecord(name, *record[:-4])
 
     @classmethod
     def from_name(cls, name):
         bs = cls.CHIPS_MAP[name]
-        record = struct.unpack("<5I", bs)
+        record = struct.unpack("<5i", bs)
         return cls(name, *record)
 
     

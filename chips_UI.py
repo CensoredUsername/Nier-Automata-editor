@@ -10,6 +10,7 @@ class ChipsManagerUI(tk.Frame):
     def __init__(self, savefilelocation, master=None):
         with open(savefilelocation,"rb") as f:
             self.save_data = f.read()
+        self.chips_manager = chips.ChipsRecordManager(self.save_data)
         super().__init__(master)
         self.createWidgets()
 
@@ -26,10 +27,15 @@ class ChipsManagerUI(tk.Frame):
 
     def populate(self):
         available_chips = ("(Empty)",) + chips.ChipsRecord.AVAILABLE_CHIPS
-        for row in range(100):
+        for row in range(300):
             tk.Label(self.frame, text=str(row), width=3, borderwidth="1", relief="solid").grid(row=row, column=0)
             cb = tk.ttk.Combobox(self.frame, values=available_chips, state="readonly")
             cb.grid(row=row, column=1)
+            current = self.chips_manager.get_chip_at(row)
+            if current.name != chips.ChipsRecord.INVALID_CHIP:
+                cb.current(current.name)
+            else:
+                cb.current(0)
             
             
             #tk.Label(self.frame, text="this is the second column for row {0}".format(row)).grid(row=row, column=1)
@@ -63,7 +69,7 @@ if __name__=="__main__":
     # interface.mainloop()
     root = tk.Tk()
     root.geometry('400x400')
-    ui = ChipsManagerUI("/tmp/save_data", root)
+    ui = ChipsManagerUI("SlotData_0.dat", root)
     ui.pack(side="top", fill="both", expand=True)
     ui.master.title("NieR;Automata Save Editor")
     root.mainloop()
