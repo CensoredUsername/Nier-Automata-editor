@@ -147,23 +147,19 @@ class ChipsRecord(object):
         record = struct.unpack("<5i", bs)
         return cls(name, *record)
 
-    
-
-
-
 
 class ChipsRecordManager(object):
 
     SAVE_DATA_CHIPS_OFFSET = 0x324BC
-    SAVE_DATA_CHIPS_OFFSET_END = 0x35CFB
-    SAVE_DATA_CHIPS_SIZE = SAVE_DATA_CHIPS_OFFSET - SAVE_DATA_CHIPS_OFFSET_END + 1
+    SAVE_DATA_CHIPS_OFFSET_END = 0x35CFC
+    SAVE_DATA_CHIPS_SIZE = SAVE_DATA_CHIPS_OFFSET_END - SAVE_DATA_CHIPS_OFFSET
     SAVE_DATA_CHIPS_COUNT = SAVE_DATA_CHIPS_SIZE // 48
 
-    def __init__(self, buf=None, offset=0):
+    def __init__(self, buf=None):
         if buf is not None:
-            self.blocks = bytearray(buf[offset:ChipsRecordManager.SAVE_DATA_CHIPS_SIZE])
+            self.blocks = bytearray(buf[ChipsRecordManager.SAVE_DATA_CHIPS_OFFSET:ChipsRecordManager.SAVE_DATA_CHIPS_OFFSET_END])
         else:
-            self.blocks = bytearray(ChipsRecordManager.SAVE_DATA_CHIPS_SIZE)
+            self.blocks = bytearray(ChipsRecordManager.SAVE_DATA_CHIPS_SIZE*48)
             self.blocks[0:48] = b"\x22\x01\x00\x00\x0A\x0D\x00\x00\x2A\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 
     def export(self):

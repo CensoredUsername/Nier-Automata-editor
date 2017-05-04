@@ -72,7 +72,9 @@ class TestChipsRecordManagerMethods(unittest.TestCase):
 
     @classmethod
     def setUp(cls):
-        cls.target = chips.ChipsRecordManager()
+        with open("./SlotData_0.dat","rb") as f:
+            data = f.read()
+        cls.target = chips.ChipsRecordManager(buf=data)
 
     def test_get_chip_at(self):
         actual = self.target.get_chip_at(0)
@@ -83,17 +85,14 @@ class TestChipsRecordManagerMethods(unittest.TestCase):
 
     def test_export(self):
         actual = self.target.export()
-        self.assertEqual(actual, b"\x22\x01\x00\x00\x0A\x0D\x00\x00\x2A\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" +
-                         (b"\xFF" * 44 + b"\x00" * 4) * 299)
+        self.assertEqual(actual[:12], b"\x22\x01\x00\x00\x0A\x0D\x00\x00\x2A\x00\x00\x00")
+        self.assertEqual(len(actual), chips.ChipsRecordManager.SAVE_DATA_CHIPS_SIZE)
     
     def test_set_chip_at(self):
         record = chips.ChipsRecord.from_name("Auto-use Item +4")
         self.target.set_chip_at(5, record)
         actual = self.target.export()
-        self.assertEqual(actual, b"\x22\x01\x00\x00\x0A\x0D\x00\x00\x2A\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" +
-                         (b"\xFF" * 44 + b"\x00" * 4) * 4 +
-                         b"\xEB\x00\x00\x00\xAC\x0C\x00\x00\x1B\x00\x00\x00\x04\x00\x00\x00\x09\x00\x00\x00"+b"\xFF"*24+b"\x00"*4 +
-                         (b"\xFF" * 44 + b"\x00" * 4) * 294 )
+        self.assertEqual(actual[48*5:48*5+20], b"\xEF\x00\x00\x00\xB0\x0C\x00\x00\x1B\x00\x00\x00\x04\x00\x00\x00\x09\x00\x00\x00")
 
 
 if __name__ == '__main__':
@@ -101,4 +100,5 @@ if __name__ == '__main__':
     suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(TestChipsMapMethods))
     suite.addTests(loader.loadTestsFromTestCase(TestChipsRecordMethods))
+    suite.addTests(loader.loadTestsFromTestCase(TestChipsRecordManagerMethods))
     unittest.TextTestRunner(verbosity=2).run(suite)

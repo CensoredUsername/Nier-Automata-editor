@@ -27,18 +27,24 @@ class ChipsManagerUI(tk.Frame):
 
     def populate(self):
         available_chips = ("(Empty)",) + chips.ChipsRecord.AVAILABLE_CHIPS
+        available_sizes = [i for i in range(31)]
         for row in range(300):
             tk.Label(self.frame, text=str(row), width=3, borderwidth="1", relief="solid").grid(row=row, column=0)
-            cb = tk.ttk.Combobox(self.frame, values=available_chips, state="readonly")
-            cb.grid(row=row, column=1)
+            chip_cb = tk.ttk.Combobox(self.frame, values=available_chips, state="readonly")
+            chip_cb.grid(row=row, column=1)
+            size_cb = tk.ttk.Combobox(self.frame, values=available_sizes, state="readonly")
+            size_cb.grid(row=row, column=2)
             current = self.chips_manager.get_chip_at(row)
-            if current.name != chips.ChipsRecord.INVALID_CHIP:
-                cb.current(current.name)
+            if current != chips.ChipsRecord.INVALID_CHIP:
+                chip_cb.current(available_chips.index(current.name))
+                size_cb.current(current.size)
+                if current.offset_a != -1 or current.offset_b != -1 or current.offset_c != -1:
+                    chip_cb['state'] = "disabled"
+                    size_cb['state'] = "disabled"
             else:
-                cb.current(0)
-            
-            
-            #tk.Label(self.frame, text="this is the second column for row {0}".format(row)).grid(row=row, column=1)
+                chip_cb.current(0)
+                size_cb.current(0)
+
 
     def onFrameConfigure(self, event):
         '''Reset the scroll region to encompass the inner frame'''
@@ -69,7 +75,7 @@ if __name__=="__main__":
     # interface.mainloop()
     root = tk.Tk()
     root.geometry('400x400')
-    ui = ChipsManagerUI("SlotData_0.dat", root)
+    ui = ChipsManagerUI("./SlotData_0.dat", root)
     ui.pack(side="top", fill="both", expand=True)
     ui.master.title("NieR;Automata Save Editor")
     root.mainloop()
