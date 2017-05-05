@@ -1,4 +1,3 @@
-
 import struct
 from io import BytesIO
 
@@ -48,7 +47,6 @@ LEVEL_MINIMUMSIZE = {
     8: 21
 }
 
-
 UNIQUE_CHIPS = {
     "Item Scan": b"\xF5\x00\x00\x00\x88\x0C\x00\x00\x23\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00",
     "Death Rattle": b"\x21\x01\x00\x00\x06\x0D\x00\x00\x26\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00",
@@ -73,19 +71,18 @@ UNIQUE_CHIPS = {
     "Auto-Fire": b"\xF9\x00\x00\x00\x1B\x0D\x00\x00\x3C\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00",
     "Auto-Evade": b"\xFA\x00\x00\x00\x1C\x0D\x00\x00\x3D\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00",
     "Auto-Program": b"\xFB\x00\x00\x00\x1D\x0D\x00\x00\x3E\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00",
-    "Auto-Weapon Switch": b"\xFC\x00\x00\x00\x1E\x0D\x00\x00\x3F\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00"
+    "Auto-Weapon Switch": b"\xFC\x00\x00\x00\x1E\x0D\x00\x00\x3F\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00",
 }
 
 
 class ChipsMap(object):
-
     def __init__(self):
         self.name_to_bytes_map = dict()
         for k, v in COMMON_CHIPS.items():
             self.name_to_bytes_map[k] = v + struct.pack("<2i", 0, 4)
             r = struct.unpack("<3i", v)
             for i in range(1, 9):
-                nv = struct.pack("<3i", r[0]+i, r[1]+i, r[2])
+                nv = struct.pack("<3i", r[0] + i, r[1] + i, r[2])
                 self.name_to_bytes_map[k + " +" +
                                        str(i)] = nv + struct.pack("<2i", i, LEVEL_MINIMUMSIZE[i])
         for k, v in UNIQUE_CHIPS.items():
@@ -96,7 +93,7 @@ class ChipsMap(object):
             self.bytes_to_name_map[v] = k
             r = struct.unpack("<3i", v)
             for i in range(1, 9):
-                nv = struct.pack("<3i", r[0]+i, r[1]+i, r[2])
+                nv = struct.pack("<3i", r[0] + i, r[1] + i, r[2])
                 self.bytes_to_name_map[nv] = k + " +" + str(i)
         for k, v in UNIQUE_CHIPS.items():
             self.bytes_to_name_map[v[:12]] = k
@@ -105,32 +102,35 @@ class ChipsMap(object):
         if isinstance(key, bytes) or isinstance(key, bytearray):
             return self.bytes_to_name_map.get(bytes(key)[:12], "Invalid Chip")
         elif isinstance(key, str):
-            return self.name_to_bytes_map.get(key, b"\xFF"*44+b"\x00"*4)
-
+            return self.name_to_bytes_map.get(key, b"\xFF" * 44 + b"\x00" * 4)
 
 
 class ChipsRecord(object):
     """Represent a chip record"""
     CHIPS_MAP = ChipsMap()
     AVAILABLE_CHIPS = tuple(CHIPS_MAP.name_to_bytes_map.keys())
-    INVALID_CHIP = -1
+    EMPTY_RECORD = -1
 
-    def __init__(self, name, chip_id_1, chip_id_2, type_id, level, size, offset_A=-1, offset_B=-1, offset_C=-1):
+    def __init__(self, name, chip_id_1, chip_id_2, type_id, level, size, offset_a=-1, offset_b=-1, offset_c=-1):
         self.name = name
         self.chip_id_1 = chip_id_1
         self.chip_id_2 = chip_id_2
         self.type_id = type_id
         self.level = level
         self.size = size
-        self.offset_a = offset_A
-        self.offset_b = offset_B
-        self.offset_c = offset_C
+        self.offset_a = offset_a
+        self.offset_b = offset_b
+        self.offset_c = offset_c
+
+    def __str__(self):
+        return "<ChipsRecord name:{0} level:{1} size:{2} offset:{3:X} {4:X} {5:X}>".format(self.name, self.level,
+                                                                                           self.size, self.offset_a,
+                                                                                           self.offset_b, self.offset_c)
 
     def pack(self):
         """Convert to bytes"""
-        return struct.pack("<12i", self.chip_id_1, self.chip_id_2,
-                           self.type_id, self.level, self.size, self.offset_a, self.offset_b,
-                           self.offset_c, -1, -1, -1, 0)
+        return struct.pack("<12i", self.chip_id_1, self.chip_id_2, self.type_id, self.level, self.size, self.offset_a,
+                           self.offset_b, self.offset_c, -1, -1, -1, 0)
 
     @staticmethod
     def unpack(bs):
@@ -138,7 +138,7 @@ class ChipsRecord(object):
         name = ChipsRecord.CHIPS_MAP[bs]
         record = struct.unpack("<12i", bs)
         if record[0] == record[1] == record[2] == -1:
-            return ChipsRecord.INVALID_CHIP
+            return ChipsRecord.EMPTY_RECORD
         return ChipsRecord(name, *record[:-4])
 
     @classmethod
@@ -149,7 +149,6 @@ class ChipsRecord(object):
 
 
 class ChipsRecordManager(object):
-
     SAVE_DATA_CHIPS_OFFSET = 0x324BC
     SAVE_DATA_CHIPS_OFFSET_END = 0x35CFC
     SAVE_DATA_CHIPS_SIZE = SAVE_DATA_CHIPS_OFFSET_END - SAVE_DATA_CHIPS_OFFSET
@@ -157,9 +156,10 @@ class ChipsRecordManager(object):
 
     def __init__(self, buf=None):
         if buf is not None:
-            self.blocks = bytearray(buf[ChipsRecordManager.SAVE_DATA_CHIPS_OFFSET:ChipsRecordManager.SAVE_DATA_CHIPS_OFFSET_END])
+            self.blocks = bytearray(
+                buf[ChipsRecordManager.SAVE_DATA_CHIPS_OFFSET:ChipsRecordManager.SAVE_DATA_CHIPS_OFFSET_END])
         else:
-            self.blocks = bytearray(ChipsRecordManager.SAVE_DATA_CHIPS_SIZE*48)
+            self.blocks = bytearray(ChipsRecordManager.SAVE_DATA_CHIPS_SIZE * 48)
             self.blocks[0:48] = b"\x22\x01\x00\x00\x0A\x0D\x00\x00\x2A\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 
     def export(self):
@@ -167,17 +167,20 @@ class ChipsRecordManager(object):
 
     def get_all_chips(self):
         for i in range(self.SAVE_DATA_CHIPS_COUNT):
-            yield ChipsRecord.unpack(self.blocks[i*48: (i+1)*48])
+            yield ChipsRecord.unpack(self.blocks[i * 48: (i + 1) * 48])
 
     def get_chip_at(self, index):
         if not 0 <= index < ChipsRecordManager.SAVE_DATA_CHIPS_COUNT:
             raise IndexError
-        return ChipsRecord.unpack(self.blocks[index*48: (index+1)*48])
+        return ChipsRecord.unpack(self.blocks[index * 48: (index + 1) * 48])
 
     def set_chip_at(self, index, record):
         if not 0 <= index < ChipsRecordManager.SAVE_DATA_CHIPS_COUNT:
             raise IndexError
-        self.blocks[index*48: (index+1)*48] = record.pack()
+        if record == ChipsRecord.EMPTY_RECORD:
+            self.blocks[index * 48: (index + 1) * 48] = b"\xFF" * 44 + b"\x00" * 4
+        else:
+            self.blocks[index * 48: (index + 1) * 48] = record.pack()
 
     def __getitem__(self, index):
         return self.get_chip_at(index)

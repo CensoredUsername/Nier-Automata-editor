@@ -8,6 +8,7 @@ import os
 from os import path
 import shutil
 import binascii
+import chips_UI
 
 class SaveGame:
     def __init__(self, path):
@@ -163,6 +164,11 @@ class Interface(tk.Frame):
             money_var.set(str(data.money))
             tk.Entry(saveframe, textvariable=money_var).grid(row=4, column=1, sticky=FILL)
             tk.Button(saveframe, text="Set", command=curry(command, save_button, money_var, data)).grid(row=4, column=2, sticky=FILL)
+
+            # chips
+
+            tk.Button(saveframe, text="Edit Chips").grid(row=5, column=1, sticky=FILL)
+
 
 def main():
     user_folder = os.getenv("USERPROFILE")
