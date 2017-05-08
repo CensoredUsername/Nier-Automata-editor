@@ -2,12 +2,11 @@
 
 import tkinter as tk
 import tkinter.ttk
-import tkinter.filedialog
-import os,os.path
 import chips
 
 class ChipsManagerUI(tk.Frame):
-    def __init__(self, save_data, master=None, on_close=None):
+
+    def __init__(self, save_data, on_close=None):
 
         self._save_data = bytearray(save_data)
         self._chips_manager = chips.ChipsRecordManager(self._save_data)
@@ -20,12 +19,9 @@ class ChipsManagerUI(tk.Frame):
         super().__init__(root)
         self.pack(side="top", fill="both", expand=True)
         self.create_widgets()
-        # if master is not None:
-        #     binding = master.bind_class("<Destroy>", root.destroy)
-        # if callable(on_close):
-        #     self.bind("<Destroy>", lambda _: on_close(self._save_data))
-        #     self.bind("<Destroy>", lambda _: print("closed"))
-        # self.bind("<Destroy>", lambda _: master.unbind(binding))
+
+        if callable(on_close):
+            self.bind("<Destroy>", lambda _: on_close(self._save_data))
 
 
     def create_widgets(self):
@@ -98,41 +94,14 @@ class ChipsManagerUI(tk.Frame):
         self.master.destroy()
 
 
-
-
-if __name__=="__main__":
-    # user_folder = os.getenv("USERPROFILE")
-    # nier_automata_folder = os.path.join(user_folder, "Documents", "My Games", "NieR_Automata")
-    # if not os.path.isdir(nier_automata_folder):
-    #     raise Exception("Could not find NieR;Automata's save folder location")
-
-    # gamedata_path = os.path.join(nier_automata_folder, "GameData.dat")
-    # if not os.path.isfile(gamedata_path):
-    #     raise Exception("Could not find NieR_Automata/GameData.dat. Please run Nier;Automata at least once before using this tool.")
-
-    # # read the gamedata header.
-    # with open(gamedata_path, "rb") as f:
-    #     gamedata_header = f.read(12)
-
-    # locations = ("SlotData_0.dat", "SlotData_1.dat", "SlotData_2.dat")
-    # import collections
-    # saves = collections.OrderedDict()
-
-
-    # interface = ChipsManagerUI(os.path.join(nier_automata_folder, locations[2]))
-    # interface.master.title("NieR;Automata Save Editor")
-    # interface.mainloop()
-
-
-
+if __name__ == "__main__":
 
     root = tk.Tk()
-
 
     def open_ui():
         with open("./SlotData_0.dat", "rb") as f:
             data = f.read()
-        ui = ChipsManagerUI(data, root, lambda out: print(len(out)))
+        ChipsManagerUI(data, lambda out: print(len(out)))
 
     tk.Button(root, text="Open", command=open_ui).pack(fill="both")
 

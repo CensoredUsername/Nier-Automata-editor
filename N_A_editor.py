@@ -167,7 +167,12 @@ class Interface(tk.Frame):
 
             # chips
 
-            tk.Button(saveframe, text="Edit Chips").grid(row=5, column=1, sticky=FILL)
+            def on_inventory_clicked(save_button, original_data):
+                def replace_data(new_data):
+                    original_data.original = new_data
+                chips_UI.ChipsManagerUI(original_data.original, replace_data)
+                save_button.config(state=tk.NORMAL)
+            tk.Button(saveframe, text="Edit Chips", command=curry(on_inventory_clicked, save_button, data)).grid(row=5, column=1, sticky=FILL)
 
 
 def main():
