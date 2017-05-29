@@ -1,6 +1,68 @@
 Address
 ====
 
+## First 12 bytes of GameData.dat
+Start: 0x00004
+Length: 12 bytes
+
+## Time spent in game in seconds
+Start: 0x00024
+Length: 4 bytes
+
+## Current chapter
+Start: 0x0002C
+Length: 4 bytes, -1 if not present (due to saving after an ending)
+
+## Character name
+Start: 0x00034
+Length: 70 bytes maximum, UTF-16 or UCS-2 encoded, null terminated and padded.
+
+## Gameworld state
+Start: 0x0007C
+Length: 0x30000 bytes, null terminated and padded.
+Structure: This segment is formatted as whitespace-delimited ascii text. Each nesting level adds an additional space at the start of each line. This section contains all quest/story/world state. The structure is formatted approximately as follows:
+
+```
+version v0.0.2
+Scene
+ Action
+  [random 32-bit hex id]
+   [several subcommands exist, like:
+    ch [number, usually -1],
+    Hp [number]
+    Hacked [1/0]
+    bSpStun [1/0]
+    state [decimal number? or bitflag? or DONE]
+    done [1/0]
+    disabled [1/0]
+    value [hexadecimal value, prefixed with 0x]
+    user0 {starts an array}
+    user1 {starts an array}
+    layout {starts an array}
+    script {starts an array}
+
+    arrays start with a "size [decimal number]" command indicating the amount of sub entries, additionally, within a script, all entries are "value first [flag] second [something or DONE]"
+   ]
+ Behaviour
+  [random 32-bit hex id]
+SceneState
+ [Long list of things that seem like string boolean flags that influence the state of the world.
+  Seems to be there to keep track of which variants of environments need to be loaded and which quests have been finished. Examples:
+  Tower_Appear: is the tower in the world.
+  PV_All_Cadaver: Should the bodies of robots appear in Pascal's village
+  q122_DONE - quest 122 is finished. Note that the naming for quests is very variable. Some end in FIN, some in DONE and separation happens with both slashes and underscores.
+ ]
+Flags
+ [collection of flags identified by their string id.
+  Most seem to be for the transporters, which have the following ids:
+  ft_BK, ft_RC, ft_CC, ft_CRb, ft_CS, ft_DC, ft_DI, ft_DO, ft_DD, ft_AP, ft_RME, ft_AS, ft_PV, ft_FC, ft_FC2, ft_FC3, ft_SC (bunker, resistance camp, city, desert, apartments, ?, attraction square, pascal village, forest kingdom, ? (question marks are flooded city and cave probably))
+ ]
+Values
+ [string id followed by 0x7 and then a decimal value, i.e. "novelunlock 0x7 15"]
+Quest
+ [active quests denoted by their id, i.e. q561]
+```
+
 ## Money
 Start: 0x3056C
 Length: 4 Bytes
