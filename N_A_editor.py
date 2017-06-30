@@ -2,7 +2,7 @@
 # Note: I am not responsible for you fucking your save game up with this.
 
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 import struct
 import os
 from os import path
@@ -179,7 +179,8 @@ def main():
     user_folder = os.getenv("USERPROFILE")
     nier_automata_folder = path.join(user_folder, "Documents", "My Games", "NieR_Automata")
     if not path.isdir(nier_automata_folder):
-        raise Exception("Could not find NieR;Automata's save folder location")
+        messagebox.showerror("Error", "Could not find Nier;Automata's save folder location. Please select the save folder location")
+        nier_automata_folder = filedialog.askdirectory()
 
     gamedata_path = path.join(nier_automata_folder, "GameData.dat")
     if not path.isfile(gamedata_path):
