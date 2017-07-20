@@ -108,7 +108,7 @@ class ChipsMap(object):
 class ChipsRecord(object):
     """Represent a chip record"""
     CHIPS_MAP = ChipsMap()
-    AVAILABLE_CHIPS = tuple(CHIPS_MAP.name_to_bytes_map.keys())
+    AVAILABLE_CHIPS = tuple(sorted(CHIPS_MAP.name_to_bytes_map.keys()))
     EMPTY_RECORD = -1
 
     def __init__(self, name, chip_id_1, chip_id_2, type_id, level, size, offset_a=-1, offset_b=-1, offset_c=-1):
