@@ -62,18 +62,21 @@ class ChipsManagerUI(tk.Frame):
             else:
                 chip_cb.current(0)
                 size_cb.current(0)
+                size_cb.config(state=tk.DISABLED)
             data = (row, chip_name, chip_size)
-            chip_cb.bind("<<ComboboxSelected>>", lambda e, args=data: self.on_chip_cb_selected(e, args))
+            chip_cb.bind("<<ComboboxSelected>>", lambda e, args=data, size_cb=size_cb: self.on_chip_cb_selected(e, args, size_cb))
             size_cb.bind("<<ComboboxSelected>>", lambda e, args=data: self.on_size_cb_selected(e, args))
 
-    def on_chip_cb_selected(self, event, args):
+    def on_chip_cb_selected(self, event, args, size_cb):
         # print("index:{0} name:{1} size:{2}".format(args[0], args[1].get(), args[2].get()))
         if args[1].get() != "(Empty)":
             record = chips.ChipsRecord.from_name(args[1].get())
             args[2].set(str(record.size))
+            size_cb.config(state=tk.NORMAL)
         else:
             record = chips.ChipsRecord.EMPTY_RECORD
             args[2].set("0")
+            size_cb.config(state=tk.DISABLED)
         self.updated_chips[args[0]] = record
 
     def on_size_cb_selected(self, event, args):
