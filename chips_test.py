@@ -95,10 +95,53 @@ class TestChipsRecordManagerMethods(unittest.TestCase):
         self.assertEqual(actual[48*5:48*5+20], b"\xEF\x00\x00\x00\xB0\x0C\x00\x00\x1B\x00\x00\x00\x04\x00\x00\x00\x09\x00\x00\x00")
 
 
+class TestDiamondInventoryUpdates(unittest.TestCase):
+
+    def setUp(self):
+        data = bytearray(chips.ChipsRecordManager.SAVE_DATA_CHIPS_OFFSET_END)
+        self.target = chips.ChipsRecordManager(buf=data)
+
+    def test_normalizes_only_eligible_inventory_chips(self):
+        inventory_chip = chips.ChipsRecord.from_name("Drop Rate Up +6")
+        inventory_chip.size = 30
+        equipped_chip = chips.ChipsRecord.from_name("Overclock +3")
+        equipped_chip.size = 30
+        equipped_chip.offset_a = 12
+        unique_chip = chips.ChipsRecord.from_name("HUD: Objectives")
+        unique_chip.size = 30
+
+        self.target.set_chip_at(0, inventory_chip)
+        self.target.set_chip_at(1, equipped_chip)
+        self.target.set_chip_at(2, unique_chip)
+        self.target.set_chip_at(3, chips.ChipsRecord.EMPTY_RECORD)
+
+        actual = self.target.get_inventory_diamond_updates()
+
+        self.assertEqual(set(actual), {0})
+        self.assertEqual(actual[0].size, chips.LEVEL_MINIMUMSIZE[6])
+        self.assertEqual(actual[0].name, "Drop Rate Up +6")
+        self.assertEqual(self.target.get_chip_at(0).size, 30)
+
+    def test_all_chip_levels_map_to_their_diamond_costs(self):
+        for level, minimum_size in chips.LEVEL_MINIMUMSIZE.items():
+            with self.subTest(level=level):
+                record = chips.ChipsRecord.from_name("Drop Rate Up" +
+                                                     (" +" + str(level) if level else ""))
+                record.size = 30
+                self.target.set_chip_at(level, record)
+
+        actual = self.target.get_inventory_diamond_updates()
+
+        self.assertEqual(len(actual), len(chips.LEVEL_MINIMUMSIZE))
+        for level, minimum_size in chips.LEVEL_MINIMUMSIZE.items():
+            self.assertEqual(actual[level].size, minimum_size)
+
+
 if __name__ == '__main__':
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(TestChipsMapMethods))
     suite.addTests(loader.loadTestsFromTestCase(TestChipsRecordMethods))
     suite.addTests(loader.loadTestsFromTestCase(TestChipsRecordManagerMethods))
+    suite.addTests(loader.loadTestsFromTestCase(TestDiamondInventoryUpdates))
     unittest.TextTestRunner(verbosity=2).run(suite)
