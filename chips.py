@@ -132,6 +132,16 @@ class ChipsRecord(object):
         return struct.pack("<12i", self.chip_id_1, self.chip_id_2, self.type_id, self.level, self.size, self.offset_a,
                            self.offset_b, self.offset_c, -1, -1, -1, 0)
 
+    @property
+    def is_equipped(self):
+        """Whether this record is assigned to an equipped-chip slot."""
+        return self.offset_a != -1 or self.offset_b != -1 or self.offset_c != -1
+
+    @property
+    def is_common_chip(self):
+        """Whether this is a normal fuseable chip with diamond costs."""
+        return self.name.rsplit(" +", 1)[0] in COMMON_CHIPS
+
     @staticmethod
     def unpack(bs):
         """ Convert from bytes """
@@ -181,6 +191,23 @@ class ChipsRecordManager(object):
             self.blocks[index * 48: (index + 1) * 48] = b"\xFF" * 44 + b"\x00" * 4
         else:
             self.blocks[index * 48: (index + 1) * 48] = record.pack()
+
+    def get_inventory_diamond_updates(self):
+        """Return normalized copies of eligible, non-equipped inventory chips.
+
+        The returned records are deliberately not written into ``blocks``.  This
+        lets the UI keep the existing staged-edit workflow, where changes are
+        persisted only after the user chooses Save.
+        """
+        updates = {}
+        for index, record in enumerate(self.get_all_chips()):
+            if (record == ChipsRecord.EMPTY_RECORD or record.is_equipped or
+                    not record.is_common_chip or record.level not in LEVEL_MINIMUMSIZE):
+                continue
+
+            record.size = LEVEL_MINIMUMSIZE[record.level]
+            updates[index] = record
+        return updates
 
     def __getitem__(self, index):
         return self.get_chip_at(index)

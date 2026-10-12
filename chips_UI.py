@@ -11,6 +11,7 @@ class ChipsManagerUI(tk.Frame):
         self._save_data = bytearray(save_data)
         self._chips_manager = chips.ChipsRecordManager(self._save_data)
         self.updated_chips = {}
+        self._size_vars = {}
 
         root = tk.Toplevel()
         root.geometry('320x400')
@@ -29,6 +30,8 @@ class ChipsManagerUI(tk.Frame):
         tk.Label(right_frame, text="Equipped chips are not editable, un-equip them first", width=10, wraplength=70).grid(row=0, column=0)
         tk.Button(right_frame, text="Save",width=8, height=3, command=self.on_save_clicked).grid(row=1, column=0)
         tk.Button(right_frame, text="Close", width=8, height=3, command=self.on_close_clicked).grid(row=2, column=0)
+        tk.Button(right_frame, text="Make Inventory\nChips Diamond", width=8, height=3,
+                  command=self.on_make_inventory_diamond_clicked).grid(row=3, column=0)
         canvas = tk.Canvas(self, borderwidth=0, background="#ccffff", width=30)
         frame = tk.Frame(canvas, background="#ffffff")
         vsb = tk.Scrollbar(self, orient="vertical", command=canvas.yview)
@@ -46,6 +49,7 @@ class ChipsManagerUI(tk.Frame):
         for row in range(300):
             chip_name = tk.StringVar()
             chip_size = tk.StringVar()
+            self._size_vars[row] = chip_size
             tk.Label(parent, text=str(row), width=3, borderwidth="1", relief="solid").grid(row=row, column=0)
             chip_cb = tk.ttk.Combobox(parent, values=available_chips, state="readonly", textvariable=chip_name)
             chip_cb.grid(row=row, column=1)
@@ -56,7 +60,7 @@ class ChipsManagerUI(tk.Frame):
                 chip_cb.current(available_chips.index(current.name))
                 size_cb.current(current.size)
 
-                if current.offset_a != -1 or current.offset_b != -1 or current.offset_c != -1:
+                if current.is_equipped:
                     chip_cb['state'] = "disabled"
                     size_cb['state'] = "disabled"
             else:
@@ -86,6 +90,13 @@ class ChipsManagerUI(tk.Frame):
             record = chips.ChipsRecord.from_name(args[1].get())
             record.size = int(args[2].get())
             self.updated_chips[args[0]] = record
+
+    def on_make_inventory_diamond_clicked(self):
+        """Stage diamond-size costs for normal, unequipped inventory chips."""
+        updates = self._chips_manager.get_inventory_diamond_updates()
+        for index, record in updates.items():
+            self.updated_chips[index] = record
+            self._size_vars[index].set(str(record.size))
 
     def on_save_clicked(self):
         for index, record in self.updated_chips.items():
